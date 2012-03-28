@@ -24,7 +24,7 @@
             yhover = yhover+0.01*a*Math.random();
 
             if (hue>10){
-                hue=hue-100;
+                hue=hue-10;
             }
             A[1].animate({fill: "r(.5,.9)hsb("+hue+",.5,0.25)-hsb("+hue+0.05+",.5,.25)"});
             A[0].animate({fill: "rhsb("+hue+",.25,.25)-hsb("+hue+",1,.25)"});
