@@ -4,16 +4,49 @@
  *
  */
 var messages = [];
-var tags =[{title:"Web 2.0",words:["HTML5","Steve Jobs","iOS","Updates","Post-PC","CSS3","Web-sockets"]},{title:"Streaming",words:["Spotify","iTunes","Amazon Cloudrive","Google Play","Pandora","Youtube","HTML5","Steve Jobs","iOS","Updates","Post-PC","CSS3","Web-sockets","Facebook"]}];
-var comforter =[[],[]];
+var tags =[{title:"Quantum Physics",words:["Quantum Mechanics","Elementary Particle","Momentum","Probability","Wave Function","Classical Physics","Physics","Quantum State","Albert Einstein"]},{title:"Web 2.0",words:["HTML5","Steve Jobs","iOS","Updates","Post-PC","CSS3","Web-sockets"]},{title:"Streaming",words:["Spotify","iTunes","Amazon Cloudrive","Google Play","Pandora","Youtube","HTML5","Steve Jobs","iOS","Updates","Post-PC","CSS3","Web-sockets","Facebook"]},{title:"hello",words:["something","said","here"]},{title:"widget",words:["wordy","said","buzzword","lightsaber","mountain lion"]}];
+var comforter =[];
+var bosses = [];
+var groups = [];
+var shadows = [];
             
 
-            function showtags(array){
+            // function showtags(array){
+            //     for (var i=0;i<array.length;i++){
+
+            //         messages.push(R.wordbubble(array[i]["title"]));
+            //         // console.log("message 1 ="+messages[1]);
+            //         // console.log("message 2 ="+messages[2]);
+            //         // console.log("message 2 ="+messages[3]);
+            //         // comforter[i][0] = messages[i];
+                    
+            //         var wordy       = R.wordswirl(array[i]["words"], messages[i]);
+            //         var bossy       = messages[i][0].getBBox(false);
+            //         var shadow      = R.ellipse(bossy["x"]+bossy["width"]/2, bossy["y"]+bossy["height"]/2, 250, 250*(0.8)).attr({fill: "rhsb(0.7,0, 0)-hsb(0.172 , 1, .12)", stroke: "none", opacity: 0}).toBack();
+            //         console.log(comforter[i][0]);
+            //         comforter[i][0] = null;
+
+            //         comforter[i][0] = R.messages[i];
+            //         console.log(comforter[i][0]);
+            //         bosses[i] = R.wordy;
+            //         comforter[i][2] = R.shadow;
+            
+            //     }
+            // }
+            
+            function showtags (array){
                 for (var i=0;i<array.length;i++){
 
                     messages.push(R.wordbubble(array[i]["title"]));
-                    comforter[i][0]=messages[i];
-                    comforter[i][1] = R.wordswirl(array[i]["words"],comforter[i][0]);
+                    
+                    var wordy       = R.wordswirl(array[i]["words"], messages[i]);
+                    var bossy       = messages[i].getBBox(false);
+                    var shadow      = R.ellipse(bossy["x"]+bossy["width"]/2, bossy["y"]+bossy["height"]/2, 250, 250*(0.8)).attr({fill: "rhsb(0.7,0, 0)-hsb(0.172 , 1, .12)", stroke: "none", opacity: 0}).toBack();
+                    comforter[i]=wordy;
+                    
+                    bosses[i] = messages[i];
+                    shadows[i]=shadow;
+            
                 }
             }
 
@@ -23,28 +56,43 @@ var comforter =[[],[]];
  *
  */
         Raphael.fn.wordbubble = function(input){
-            var x=340;
-            var y=600;
-            var separation=300;
+            
+            var y = $("#canvas").height()/2;
+            if (tags.length>1){
+                y-= $("#canvas").height()/4;
+            }
+            
+            var x=($("#canvas").width()/tags.length+1);
+            var sep_x = ($("#canvas").width()/(tags.length+1));
+            
+            
             if (messages.length>0){
                 var prior_instance =messages[messages.length-1][1].getBBox(false);
-                x=messages[messages.length-1][0].attr("x");
-                y=prior_instance["y"]-prior_instance["height"]-separation;
-                if (messages.length%10==0){
-                    x+=100;
-                    y=570;
+                x=messages[messages.length-1][0].attr("x")+sep_x;
+                y=prior_instance["y"];
+                if (y<$("#canvas").height()/2){
+                    y+=$("#canvas").height()/2;
                 }
+                else {
+                    y-=$("#canvas").height()/2;
+                }
+                //-prior_instance["height"]-separation
                 
             }
             var text = this.text(x,y,input).attr({font: '14px Helvetica, Arial', fill: "white", cursor: "pointer", "font-weight": "bold", "fill":"rgb(254, 254, 254)"});
             var text_info = text.getBBox(false);
             var box = this.rect(x-text_info["width"]/2-6,y-text_info["height"]/2-4,text_info["width"]+12,text_info["height"]+9,5);
             var params = {fill: "rgb(26, 65, 48)", stroke: "rgb(33, 113, 87)", "fill-opacity": 1, "stroke-width": 2};
+            
+            
+            var team = this.set(box,text);
+            box.idx = groups.length; 
+            text.idx = groups.length;
+            groups.push(team);
+            team.drag(dragMove, dragStart, dragStop);
             text.toFront();
             box.attr(params);
-            return this.set(
-                    box,
-                    text);
+            return team;
         };
 
         Raphael.fn.wordswirl = function(group, boss){
@@ -71,80 +119,85 @@ var comforter =[[],[]];
                 text.toFront();
                 box.attr(params);
                 connections.push(this.connection(boss, box,"#000", "#fff|3"));
-                swirl.push(this.set(text,box));
+                var team = this.set(text,box);
+                box.idx = groups.length; 
+                text.idx = groups.length;
+                groups.push(team);
+                team.drag(dragMove, dragStart, dragStop);
+                swirl.push(team);
                 currentpitch+=pitch;
                 }
             boss.toFront();
-            this.ellipse(x, y, xradius, xradius*(0.8)).attr({fill: "rhsb(0.7,0, 0)-hsb(0.172 , 1, .12)", stroke: "none", opacity: 0}).toBack();
+            
             return swirl;
             };
-        Raphael.fn.comfort = function (array){
-            for (var h=0;h<array.length;h++){
+        Raphael.fn.comfort = function (array, bossarray){
+            for (var h=0;h<bossarray.length;h++){
             var change = false;
-            for (var i=0;i<array[h][1].length-1;i++){
-                var questionable = array[h][1][i].getBBox(false);
-                for (var j=0;j<array[h][1].length && j!=i;j++){
-                    var question = array[h][1][j].getBBox(false);
+            for (var i=0;i<array[h].length;i++){
+                var questionable = array[h][i].getBBox(false);
+                for (var j=0;j<array[h].length && j!=i;j++){
+                    var question = array[h][j].getBBox(false);
                     
                     if (Math.pow(Math.pow((questionable["x"]-questionable["width"]/2)-(question["x"]-question["width"]/2),2)+Math.pow((questionable["y"]+questionable["height"]/2)-(question["y"]+question["height"]/2),2),0.5)<100){
                         if (questionable["x"]<question["x"]){
-                            array[h][1][j].transform("...t5,0");
+                            array[h][j].transform("...t5,0");
                             change = true;
                         }
                         else {
-                            array[h][1][j].transform("...t-5,0");
+                            array[h][j].transform("...t-5,0");
                             change = true;
                         }
                         if (questionable["y"]<question["y"]){
-                            array[h][1][j].transform("...t0,5");
+                            array[h][j].transform("...t0,5");
                             change = true;
                         }
                         else {
-                            array[h][1][j].transform("...t0,-5");
+                            array[h][j].transform("...t0,-5");
                             change = true;
                         }
                         
                     }
                 }
             }
-            for (var i=0;i<array[h][1].length-1;i++){
-                var questionable = array[h][1][i].getBBox(false);
-                var question = array[h][0].getBBox(false);
+            for (var i=0;i<array[h].length;i++){
+                var questionable = array[h][i].getBBox(false);
+                var question = bossarray[h].getBBox(false);
                     
                     if (Math.pow(Math.pow((questionable["x"]-questionable["width"]/2)-(question["x"]-question["width"]/2),2)+Math.pow((questionable["y"]+questionable["height"]/2)-(question["y"]+question["height"]/2),2),0.5)>300){
                         if (questionable["x"]<question["x"]){
-                            array[h][1][i].transform("...t-5,0");
+                            array[h][i].transform("...t5,0");
                             change = true;
                         }
                         else {
-                            array[h][1][i].transform("...t5,0");
+                            array[h][i].transform("...t-5,0");
                             change = true;
                         }
                         if (questionable["y"]<question["y"]){
-                            array[h][1][i].transform("...t0,-5");
+                            array[h][i].transform("...t0,5");
                             change = true;
                         }
                         else {
-                            array[h][1][i].transform("...t0,5");
+                            array[h][i].transform("...t0,-5");
                             change = true;
                         }
                         
                     }
                     if (Math.pow(Math.pow((questionable["x"]-questionable["width"]/2)-(question["x"]-question["width"]/2),2)+Math.pow((questionable["y"]+questionable["height"]/2)-(question["y"]+question["height"]/2),2),0.5)<60){
                         if (questionable["x"]<question["x"]){
-                            array[h][1][i].transform("...t5,0");
+                            array[h][i].transform("...t-5,0");
                             change = true;
                         }
                         else {
-                            array[h][1][i].transform("...t-5,0");
+                            array[h][i].transform("...t5,0");
                             change = true;
                         }
                         if (questionable["y"]<question["y"]){
-                            array[h][1][i].transform("...t0,5");
+                            array[h][i].transform("...t0,-5");
                             change = true;
                         }
                         else {
-                            array[h][1][i].transform("...t0,-5");
+                            array[h][i].transform("...t0,5");
                             change = true;
                         }
                         
@@ -158,19 +211,6 @@ var comforter =[[],[]];
                 }
             }
             return change;
-        };
-
-        Raphael.fn.ball = function (x, y, r, hue, initmass, initspeedx, initspedy) {
-            hue = hue || 0;
-            return {object:
-                this.set(
-                    this.ellipse(x, y + r - r / 5, r, r / 2).attr({fill: "rhsb(" + hue + ",.25, .25)-hsb(" + hue + ", 1, .25)", stroke: "none", opacity: 0}),
-                    this.ellipse(x, y, r, r).attr({fill: "rgb(100,150,100)", stroke: "none", opacity: 1}), //"r(.5,.9)hsb(0.2, 1, .75)-hsb(0.35, .5, .25)"
-                    this.ellipse(x, y, r - r / 5, r - r / 20).attr({stroke: "none", fill: "r(.5,.1)#ccc-#ccc", opacity: 0})
-                ),
-                mass : initmass,
-                speedx: initspeedx,
-                speedy : initspedy};
         };
 
         Raphael.fn.connection = function (obj1, obj2, line, bg) {
@@ -231,53 +271,74 @@ var comforter =[[],[]];
         };
 
         window.onload = function () {
-            // var dragger = function () {
-            //     this.ox = this.type == "rect" ? this.attr("x") : this.attr("cx");
-            //     this.oy = this.type == "rect" ? this.attr("y") : this.attr("cy");
-                
-            // },
-            //     move = function (dx, dy) {
-            //         var att = this.type == "rect" ? {x: this.ox + dx, y: this.oy + dy} : {cx: this.ox + dx, cy: this.oy + dy};
-            //         this.attr(att);
-            //         for (var i=0; i<connections.length; i++;) {
-            //             R.connection(connections[i]);
-            //         }
-            //         R.safari();
-            //     },
-            //     up = function () {
-            // };
-            var dragger = function () {
-                this.ox = this.type == "rect" ? this.attr("x") : this.attr("cx");
-                this.oy = this.type == "rect" ? this.attr("y") : this.attr("cy");
-                
-            };
-            var up = function () {};
-            var move = function (dx, dy) {
-                    var att = this.type == "rect" ? {x: this.ox + dx, y: this.oy + dy} : {cx: this.ox + dx, cy: this.oy + dy};
-                    this.attr(att);
-                    for (var i=0; i<connections.length; i++) {
-                        R.connection(connections[i]);
-                    }
-                    R.safari();
-                };
             R = Raphael("canvas"), connections =[];
             showtags(tags);
-            console.log(comforter[0][0][0]);
-            comforter[0][0][0].drag(move, dragger, up);
-            // for (var i=0;i<comforter.length;i++){
-            //     comforter[i][0].drag(move,dragger, up);
-            // }
-            
-
         };
+        function dragStart() {
+            var g = null;
+            if (!isNaN(this.idx)) {
+                //find the set (if possible)
+                var g = groups[this.idx];
+            }
+            if (g) {
+                var i;
+                //store the starting point for each item in the set
+                for(i=0; i < g.items.length; i++) {
+                    g.items[i].ox = g.items[i].attr("x");
+                    g.items[i].oy = g.items[i].attr("y");
+                }
+            }
+        }
+        function dragMove(dx, dy) {
+            if (!isNaN(this.idx)) {
+                var g = groups[this.idx];
+            }
+
+            if (g) {
+                var x;
+                //reposition the objects relative to their start position
+                for(x = 0; x < g.items.length; x++) {
+                    var obj = g.items[x];   //shorthand
+                    obj.attr({ x: obj.ox + dx, y: obj.oy + dy });
+                }
+            
+            
+            for (var i=0; i<connections.length; i++) {
+                        R.connection(connections[i]);
+                    }
+            }
+        }
+    
+        function dragStop() {
+            var g = null;
+            if (!isNaN(this.idx)) {
+                //find the set (if possible)
+                var g = groups[this.idx];
+            }
+            if (g) {
+                var i;
+                //remove the starting point for each of the objects
+                for(i=0; i < g.items.length; i++) {
+                    delete(g.items[i].ox);
+                    delete(g.items[i].oy);
+                }
+            }
+            
+            for (j=0;j<tags.length;j++){
+                
+                shadows[j].attr({cx:bosses[j][1].attr("x"),cy:bosses[j][1].attr("y")});
+            }
+            need = true;
+        }
         var R;
         var A;
         var B;
         var need = true;
         var dt = 20;
-        // var pastfill = "rgb(157, 210, 47)";//"r(.5,.9)hsb(0.4, 1, .75)-hsb(0.45, .5, .25)"
         setInterval ( function () {
-            need = R.comfort(comforter);
+            if (need){
+                need=R.comfort(comforter,bosses);
+            }
 
         }
             , dt );

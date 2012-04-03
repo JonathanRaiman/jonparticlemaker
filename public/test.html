@@ -1,0 +1,111 @@
+     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="raphael.js"></script>
+    <script type="text/javascript">
+        //variables we'll need throughout the sample code
+        var workspace;
+        var groups = [];     //just an array of the sets we create.
+    
+        //Stuff to do when the page is done loading
+        $(document).ready( function () {
+            redraw();
+        });
+
+        //The routine to repaint the drawing area
+        function redraw() {
+            workspace = Raphael('workspace', "100%", "80%");
+
+            //Add a rectangle
+            var rect = workspace.rect(0,0, 150, 100, 3);
+            rect.attr({
+                "stroke": "#00f",
+                "stroke-width": 2,
+                "fill" : "#fff"
+            });
+
+            var txt =  workspace.text(75, 50, "Drag/Drop\nExample");
+            txt.attr({
+                "width" : 150,
+                "fill": "#000",
+                "font-size": "12pt",
+                "font-weight": "bold"
+            });
+
+            //Create a set so we can move the
+            //text and rectangle at the same time
+            var g = workspace.set(rect, txt);
+            
+            //store the next index in our groups array
+            //so we can easily find the set later
+            //then add the set to the groups array
+            rect.idx = groups.length;  
+            groups.push(g);
+
+            //set up drag/drop
+            // - This could be applied to the set as well, but the "dragged"
+            //   object ends up being the rect anyways.
+            rect.drag(dragMove, dragStart, dragStop);
+        }
+
+        //set up our object for dragging
+        function dragStart() {
+            var g = null;
+            if (!isNaN(this.idx)) {
+                //find the set (if possible)
+                var g = groups[this.idx];
+            }
+            if (g) {
+                var i;
+                //store the starting point for each item in the set
+                for(i=0; i < g.items.length; i++) {
+                    g.items[i].ox = g.items[i].attr("x");
+                    g.items[i].oy = g.items[i].attr("y");
+                }
+            }
+        }
+
+        //clean up after dragging
+        function dragStop() {
+            var g = null;
+            if (!isNaN(this.idx)) {
+                //find the set (if possible)
+                var g = groups[this.idx];
+            }
+            if (g) {
+                var i;
+                //remove the starting point for each of the objects
+                for(i=0; i < g.items.length; i++) {
+                    delete(g.items[i].ox);
+                    delete(g.items[i].oy);
+                }
+            }
+        }
+
+        //take care of moving the objects when dragging
+        function dragMove(dx, dy) {
+            if (!isNaN(this.idx)) {
+                var g = groups[this.idx];
+            }
+
+            if (g) {
+                var x;
+                //reposition the objects relative to their start position
+                for(x = 0; x < g.items.length; x++) {
+                    var obj = g.items[x];   //shorthand
+                    obj.attr({ x: obj.ox + dx, y: obj.oy + dy });
+
+                //optional:  We can do a check here to see what property
+                //           we should be changing.
+                // i.e. (haven't fully tested this yet):
+                // switch (obj.type) {
+                //     case "rect":
+                //     case "text":
+                //         obj.attr({ x: obj.ox + dx, y: obj.oy + dy });
+                //         break;
+                //     case "circle":
+                //         obj.attr({ cx: obj.ox + dx, cy: obj.oy + dy });
+                // }
+                }
+            }
+        }
+    </script>
+<div id="workspace" style="width: 100%; height: 100%;"></div>
