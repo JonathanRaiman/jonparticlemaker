@@ -1,8 +1,8 @@
 /*
- *
- *           DATABASE && TAGS
- *
- */
+-----------------------------------------------------------------------------------------------
+                            SAMPLE DATABASE, SETTINGS, & CONSTRUCTORS
+-----------------------------------------------------------------------------------------------
+*/
 
 function tag(word,strength,date,boss) {
     this.word       = word || "???";
@@ -28,13 +28,13 @@ function tag(word,strength,date,boss) {
     };
   this.removetag = function () {
         if (this.connections.length>0 && this.connections != null){
-            console.log("severing connections for "+this.word);
             for (var i=0;i<this.connections.length;i++){
                 if (this.connections[i] != null){
-                this.connections[i].line.remove();
-                this.connections[i].bg.remove();
-                delete(this.connections[i]);//.remove()
-                console.log((i+1)+" removed");
+                this.connections[i].line.hide();
+                this.connections[i].bg.hide();
+                this.connections.splice(i);
+                
+                // delete(this.connections[i]);//.remove()
             }
             }
             this.collections = [];
@@ -54,7 +54,9 @@ function tag(word,strength,date,boss) {
 
 Raphael.fn.drawtag = function (sometag) {
     if (sometag.textbubble == null){
-    sometag.textbubble = this.text($(window).width()/2,($(window).height()-55)/2+55,sometag.word).attr(textattr).attr({font: "12px Helvetica, Arial"});
+    var xsize = $(window).width();
+    var ysize = $(window).height();
+    sometag.textbubble = this.text(xsize+150,55,sometag.word).attr(textattr).attr({font: "12px Helvetica, Arial"});
     sometag.textbubble.dad = sometag;
     var text_info   = sometag.textbubble.getBBox(false);
     sometag.box        = this.rect($(window).width()/2-text_info["width"]/2-12,($(window).height()-55)/2+55-text_info["height"]/2-4,text_info["width"]+24,text_info["height"]+9,5).attr(boxparams);
@@ -78,6 +80,7 @@ Raphael.fn.drawtag = function (sometag) {
     sometag.box.drag(dragMove,dragStart,dragStop);
     sometag.textbubble.drag(dragMove,dragStart,dragStop);
     sometag.textbubble.toFront();
+    sometag.MoveTo(xsize/2+(Math.pow(Math.random(),3)-0.5)*xsize*0.9,(ysize+80)/2+(Math.pow(Math.random(),3)-0.5)*(ysize-80)*0.9, 500);
     
 }
 
@@ -110,8 +113,6 @@ new tag("Ruby", 1,  "01/04/2012|05/04/2012",web2o),
 new tag("Cloud Power", 1, "18/03/2012|22/03/2012",web2o),
 ];
 
-var groups             = [];
-var months             = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 var bckgrnd            = "rgb(254,254,254)";
 var bckgrnddark        = "rgb(25,26,25)";
 var btntheme           = 'rgb(239,240,241)-'+bckgrnd;
@@ -131,31 +132,84 @@ var dothoveredweekly   = {fill:"rgb(170,170,170)", "stroke-width": 5, rx: "6", r
 var bracketattr        = {fill:"rgb(169, 125, 247)", "stroke-width": 3, "stroke-opacity": 1, stroke: "rgb(199, 172, 247)",cursor:"col-resize"};
 var boxparams          ={fill: "rgb(26, 65, 48)", stroke: "rgb(33, 113, 87)","fill-opacity": 1, "stroke-width": 2};
 var timebarthickness   = 30;
+var matches            = 0;
+var updateconnections  = false;
 var bracket;
 var topbar;
 var timebar;
 var dots;
-var updateconnections = false;
 var R;
 var T;
 
 
-        /*
-            
-
-            MAIN FUNCTION && WINDOW REDRAWS
-
-        
-        */
+/*
+-----------------------------------------------------------------------------------------------
+                            MAIN FUNCTION & WINDOW REDRAWS
+-----------------------------------------------------------------------------------------------
+*/
         
 
         $(window).resize(function(){
-             w = $(window).width();
-             h = $(window).height();
-             bracket.attr({x: w+bracket.offset});
-             dots = R.dotify(timebar);
+            w = $(window).width();
+            h = $(window).height();
+            bracket.attr({x: w+bracket.offset});
+            dots = R.dotify(timebar);
+            if (bracket.offset>=-40 && bracket.attr("width") <=20){
+                // PUSHED TOO FAR RIGHT
+                bracket.offset=-60;
+                bracket.attr({x: w-60, width: 20, fill: "white"});
+                bracket.animate(bracketattr, 200);
+                
+            }
+            else if (bracket.offset+bracket.attr("width")>-60){
+                if (bracket.attr("width")==20 && bracket.offset<=-40){ // i.e. if too small
+                    // TOO SMALL
+                    bracket.offset = -60;
+                    bracket.attr({x: w-60, width : 20, fill: "white"});
+                    bracket.animate(bracketattr, 200);
+                
+                }
+                else if (-bracket.offset-bracket.attr("width")<20){ // if spilling over right
+                    // SPILLING RIGHT
+                    bracket.attr({width:Math.max(-(bracket.offset)-40,20),fill: "white"});
+                    if (bracket.offset>-60){
+                        bracket.attr({x:w-60});
+                        bracket.offset=-60;
+                    }
+                    bracket.animate(bracketattr, 200);
+                }
+                else{}
+            }
+            else if (bracket.attr("x")-20<w%40){ 
+                // SPILLING LEFT
+                var extra = bracket.offset-20+w;
+                bracket.offset = 40-w;
+                bracket.attr({x: 20+w%40, width: Math.max(bracket.attr("width")+extra+20,20), fill: "white"});
+                bracket.animate(bracketattr, 200);
+            }
+            else {}
+
+            if ((bracket.attr("width")+80)>w){
+                // TOO BIG
+                var remainder = w%40;
+                if (remainder < 20){
+                    remainder += 20;
+                }{}
+                bracket.attr({x: remainder, width: w-40-w%40, fill: "white" });
+                bracket.animate(bracketattr, 200);
+            }
         });
+        $("document").ready( function () {
+            console.log("hello");
+            $("svg").bind("dragstart", function (e){
+                
+                e.preventDefault();
+
+        });
+            console.log("solved");
+    });
         window.onload = function () {
+
             R = Raphael("canvas");
             T = Raphael("canvas");
             R.timeline(tags);
@@ -170,7 +224,7 @@ var T;
             R.blockbutton(200,10, "Questions? Answers? Fixes? Bugs? Talk to");
             R.plusbutton(490,10, "Jonathan Raiman").attr({href:"mailto:jonathan.raiman@pomona.edu"});
             R.minusbutton(670,10, "");
-            R.drawtags(tags);
+            matches = R.drawtags(tags);
             web2o.MoveTo(250,200);
             // web2o.florify(tags);
             boss.MoveTo(800,600);
@@ -182,36 +236,45 @@ var T;
             for (var i=0;i<array.length;i++){
                 text += array[i]+"\n";
                 }
-            topbar= this.rect(0, 0,"100%",55,0).attr({fill:bckgrnd, stroke:"         none"});
-            timebar= this.rect(0, 55,"100%",timebarthickness,0).attr({fill:bckgrnddark, stroke:"none"});
-            bracket = this.rect($(window).width()-240,59,200,timebarthickness-8,8).attr(bracketattr);
+            topbar         = this.rect(0, 0,"100%",55,0).attr({fill:bckgrnd, stroke:"         none"});
+            timebar        = this.rect(0, 55,"100%",timebarthickness,0).attr({fill:bckgrnddark, stroke:"none"});
+            bracket        = this.rect($(window).width()-240,59,200,timebarthickness-8,8).attr(bracketattr);
             bracket.offset =-240;
             bracket.drag(sliderresize,sliderdragStart,sliderdragStop);
-            dots = R.dotify(timebar);
+            dots         = R.dotify(timebar);
+            bracket.to   = dots[Math.max(((-bracket.offset-40)/20-bracket.attr("width")/20),0)].dotdate;
+            bracket.from = dots[Math.min((-bracket.offset-40)/20, dots.length-1)].dotdate;
             
         }
-
+/*
+-----------------------------------------------------------------------------------------------
+                            TAG SEARCH, FILTERING, & REDRAWING
+-----------------------------------------------------------------------------------------------
+*/
 
         Raphael.fn.drawtags = function (words){
             var acceptable = [];
             var text;
-            var from = dots[(-bracket.offset-40)/20].dotdate;
-            var to =dots[Math.max(((-bracket.offset-40)/20-bracket.attr("width")/20),0)].dotdate;
+            try {var from = dots[Math.min((-bracket.offset-40)/20, dots.length-1)].dotdate;}
+            catch (e) {if(e == TypeError){}}
+            try{ var to =dots[Math.max(((-bracket.offset-40)/20-bracket.attr("width")/20),0)].dotdate;
+            } catch (e) {if (e == TypeError){}}
             var xsize = $(window).width();
             var ysize = $(window).height();
             for (var i=0;i<words.length;i++){
-                if (words[i].to >= from && words[i].to <= to){
+                try{if (words[i].to >= from && words[i].to <= to){
                     acceptable.push(words[i]);
                 }
                 else {
                     words[i].removetag();
                 }
+                } catch (e) {if (e == TypeError){}}
             }
             text= "matches = "+acceptable.length+"\n";
             for (var j=0;j<acceptable.length;j++){
                 text += acceptable[j]+"\n";
                 this.drawtag(acceptable[j]);
-                acceptable[j].MoveTo(xsize/2+(Math.pow(Math.random(),3)-0.5)*xsize,ysize/2+27+(Math.pow(Math.random(),3)-0.5)*(ysize-55));
+                
             }
 
             console.log(text);
@@ -219,13 +282,75 @@ var T;
         }
 
 
-        /*
-            
+/*
+-----------------------------------------------------------------------------------------------
+                            TIMELINE DOT ITEM CREATION & MAINTENANCE
+-----------------------------------------------------------------------------------------------
+*/
+        Raphael.fn.dotify = function (object){
+            if (dots != null){ // REMOVE PREVIOUS DOTS
+            for (var i =0 ; i<dots.length; i++){
+                if (dots[i].monthtitle != null){ // if dot has a month label below it, remove it
+                    dots[i].monthtitle.remove();
+                }
+                dots[i].remove();
+            }
+            dots = null;
+            };
+            var newdots = this.set();
+            var offset = 40;
+            var offsetting = 20;
+            var box = object.getBBox(false);
+            for (var i =0; i<Math.floor($(window).width()/offsetting-2);i++){
+                newdots.push(this.dot($(window).width()-offset,object.attr("y")+object.attr("height")/2,i));
+                offset += offsetting;
+            }
+            return newdots;
+        }
 
-            OBJECTS && STANDARD ITEMS && RAPHAEL METHODS
+        Raphael.fn.dot = function(x,y, increment){
+            var dot     = this.ellipse(x,y,2,2).attr(dotunhovered);
+            var months  = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+            dot.dotdate = new Date();
+            dot.dotdate.setDate(dot.dotdate.getDate()-increment);
 
-        
-        */
+            if (increment>7){
+                
+                dot.date = dot.dotdate.getDate()+"/"+(dot.dotdate.getMonth()+1)+"/"+dot.dotdate.getFullYear();
+            }
+            else {
+                dot.date = increment + " days ago";
+            }
+
+            if (increment%7==0){
+                dot.attr(dotunhoveredweekly);
+                dot.date = (increment/7) + " weeks ago";
+                dot.mouseover(function (){this.hovereddotweekly();});
+                dot.mouseout(function (){this.unhovereddotweekly();});
+                if (increment == 7){
+                    dot.date = "a week ago";
+                }
+                else if (increment == 0){
+                    dot.date = "today";
+                }
+            }
+            else {
+                dot.mouseover(function (){this.hovereddot();});
+                dot.mouseout(function (){this.unhovereddot();});
+            }
+
+            if (dot.dotdate.getDate() == 1){
+                dot.monthtitle = this.text(x,y+30,months[dot.dotdate.getMonth()]).attr(monthattr).transform("r90");
+                dot.monthtitle.toFront();
+            }
+            return dot;
+        }
+
+/*
+-----------------------------------------------------------------------------------------------
+                            UI ITEMS, JAVASCRIPT SELECTORS, & RAPHAEL ELEMENT METHODS
+-----------------------------------------------------------------------------------------------
+*/
 
         Raphael.fn.backbutton = function (x,y, text, callback){
             var text = this.text(x+16, y+17,text || "").attr(buttontext);
@@ -354,62 +479,6 @@ var T;
             }
         }
 
-        Raphael.fn.dotify = function (object){
-            if (dots != null){
-            for (var i =0 ; i<dots.length; i++){
-                if (dots[i].monthtitle != null){
-                    dots[i].monthtitle.remove();
-                }
-                dots[i].remove();
-            }
-            };
-            var newdots = this.set();
-            var offset = 40;
-            var offsetting = 20;
-            var box = object.getBBox(false);
-            for (var i =0; i<Math.floor($(window).width()/offsetting-2);i++){
-                newdots.push(this.dot($(window).width()-offset,object.attr("y")+object.attr("height")/2,i));
-                offset += offsetting;
-            }
-            return newdots;
-        }
-
-        Raphael.fn.dot = function(x,y, increment){
-            var dot = this.ellipse(x,y,2,2).attr(dotunhovered);
-            dot.dotdate = new Date();
-            dot.dotdate.setDate(dot.dotdate.getDate()-increment);
-
-            if (increment>7){
-                
-                dot.date = dot.dotdate.getDate()+"/"+(dot.dotdate.getMonth()+1)+"/"+dot.dotdate.getFullYear();
-            }
-            else {
-                dot.date = increment + " days ago";
-            }
-
-            if (increment%7==0){
-                dot.attr(dotunhoveredweekly);
-                dot.date = (increment/7) + " weeks ago";
-                dot.mouseover(function (){this.hovereddotweekly();});
-                dot.mouseout(function (){this.unhovereddotweekly();});
-                if (increment == 7){
-                    dot.date = "a week ago";
-                }
-                else if (increment == 0){
-                    dot.date = "today";
-                }
-            }
-            else {
-                dot.mouseover(function (){this.hovereddot();});
-                dot.mouseout(function (){this.unhovereddot();});
-            }
-
-            if (dot.dotdate.getDate() == 1){
-                dot.monthtitle = this.text(x,y+30,months[dot.dotdate.getMonth()]).attr(monthattr).transform("r90");
-                dot.monthtitle.toFront();
-            }
-            return dot;
-        }
 
         Raphael.el.unhovered = function (object){
             if (this.type == "path" || this.type == "rect"){
@@ -509,17 +578,16 @@ var T;
 
 
 /*
-
-
-CONNECTIONS & TEAM DRAGGING
-
+-----------------------------------------------------------------------------------------------
+                                CONNECTIONS, CLOUD MOTIONS, & FLOWERS
+-----------------------------------------------------------------------------------------------
 */
 
         tag.prototype.florify = function (group){
             R.drawtag(this);
             var separation = 5;
             var pitch = 0;
-            var xradius = 250;
+            var xradius = 180;
             var yradius = 0.5*xradius;
             var currentpitch =0;
             var box = this.box.getBBox(false);
@@ -532,117 +600,52 @@ CONNECTIONS & TEAM DRAGGING
                 }
                 if (children.length>0){
                     pitch = 2*Math.PI/children.length;
-                    console.log("rotating by "+pitch);
                 }
                 for (var j=0;j<children.length;j++){
-                    console.log("rotating by "+pitch);
                     children[j].MoveTo(box["x"]+xradius*Math.cos(currentpitch)-box["width"]/2,box["y"]+yradius*Math.sin(currentpitch)-box["height"]/2);
                     currentpitch += pitch;
                 }
             }
         }
 
-        tag.prototype.MoveTo = function (x,y){
-            console.log(x,y);
+        tag.prototype.MoveTo = function (x,y, speed){
+            var dt = 300;
+            if (speed != null){
+                dt = speed;
+            }
                 if (this.textbubble != null){
-                    this.textbubble.animate({x: x+this.box.attr("width"), y: y+this.box.attr("height")}, 250, function () {if (updateconnections == false){ updateconnections = true;}});
+                    this.textbubble.animate({x: x+this.box.attr("width"), y: y+this.box.attr("height")}, dt, function () {if (updateconnections == false){ updateconnections = true;}});
                 }
                 if (this.shadow != null){
-                    this.shadow.animate({cx: x+this.box.attr("width"), cy: y+this.box.attr("height")}, 250, function () {if (updateconnections == false){ updateconnections = true;}});
+                    this.shadow.animate({cx: x+this.box.attr("width"), cy: y+this.box.attr("height")}, dt, function () {if (updateconnections == false){ updateconnections = true;}});
                 }
                 if (this.box != null){
-                    this.box.animate({x: x+this.box.attr("width")/2, y: y+this.box.attr("height")/2}, 250, function () {if (updateconnections == false){ updateconnections = true;}});
+                    this.box.animate({x: x+this.box.attr("width")/2, y: y+this.box.attr("height")/2}, dt, function () {if (updateconnections == false){ updateconnections = true;}});
                 }
         }
 
+        Raphael.fn.ShowDelta = function (results){
 
-
-        // Raphael.fn.wordbubble = function(input){
-        //     // count bosses
-            
-
-        //     var y = $("#canvas").height()/2;
-        //     if (tags.length>1){
-        //         y-= $("#canvas").height()/4;
-        //     }
-            
-        //     var x=($("#canvas").width()/tags.length+1);
-        //     var sep_x = ($("#canvas").width()/(tags.length+1));
-            
-            
-        //     if (bosses.length>1){
-        //         var prior_instance =messages[messages.length-1][1].getBBox(false);
-        //         x=messages[messages.length-1][0].attr("x")+sep_x;
-        //         y=prior_instance["y"];
-        //         if (y<$("#canvas").height()/2){
-        //             y+=$("#canvas").height()/2;
-        //         }
-        //         else {
-        //             y-=$("#canvas").height()/2;
-        //         }
-        //         //-prior_instance["height"]-separation
-                
-        //     }
-        //     var text = this.text(x,y,input).attr({font: '14px Helvetica, Arial', fill: "white", cursor: "pointer", "font-weight": "bold", "fill":"rgb(254, 254, 254)"});
-        //     var text_info = text.getBBox(false);
-        //     var box = this.rect(x-text_info["width"]/2-6,y-text_info["height"]/2-4,text_info["width"]+12,text_info["height"]+9,5);
-        //     var params = {fill: "rgb(26, 65, 48)", stroke: "rgb(33, 113, 87)", "fill-opacity": 1, "stroke-width": 2};
-            
-            
-        //     var team = this.set(box,text);
-        //     box.idx = groups.length; 
-        //     text.idx = groups.length;
-        //     groups.push(team);
-        //     team.drag(dragMove, dragStart, dragStop);
-        //     text.toFront();
-        //     box.attr(params);
-        //     return team;
-        // };
-
-        // Raphael.fn.wordswirl = function(group){
-        //     var bosses = [];
-        //     for (var i=0; i<input.length; i++){
-        //         if (input[i].boss == "Knowledge"){
-        //             bosses.push(input[i]);
-        //         }
-        //     }
-
-
-        //     var separation=5;
-        //     var bossy = boss.getBBox(false);
-        //     var x=bossy["x"]+bossy["width"]/2;
-        //     var y=bossy["y"]+bossy["height"]/2;
-        //     var pitch = 0;
-        //     var xradius = 250;
-        //     var yradius = 0.5*xradius;
-        //     var currentpitch =-Math.PI/2;
-        //     var swirl = [];
-        //     var params = {fill: "rgb(26, 65, 48)", stroke: "rgb(33, 113, 87)","fill-opacity": 1, "stroke-width": 2};
-           
-        //     if (group.length>0){
-        //         pitch = 2*Math.PI/group.length;
-        //     }
-
-        //     for (var i=0;i<group.length;i++){
-        //         //instance:
-        //         var text = this.text(x+xradius*Math.cos(currentpitch),y+yradius*Math.sin(currentpitch),group[i]).attr({font: '12px Helvetica, Arial', fill: "white", cursor: "pointer", "font-weight": "bold","fill":"rgb(230, 245, 230)"});
-        //         var text_info = text.getBBox(false);
-        //         var box = this.rect(x+xradius*Math.cos(currentpitch)-text_info["width"]/2-12,y+yradius*Math.sin(currentpitch)-text_info["height"]/2-4,text_info["width"]+24,text_info["height"]+9,5);
-        //         text.toFront();
-        //         box.attr(params);
-        //         connections.push(this.connection(boss, box,"#000", "#fff|3"));
-        //         var team = this.set(text,box);
-        //         box.idx = groups.length; 
-        //         text.idx = groups.length;
-        //         groups.push(team);
-        //         tags.drag(dragMove, dragStart, dragStop);
-        //         swirl.push(team);
-        //         currentpitch+=pitch;
-        //         }
-        //     boss.toFront();
-            
-        //     return swirl;
-        //     };
+            var text = "";
+            if (results-matches>0){
+                text = "+";
+            }
+            text +=(results-matches);
+            if (results-matches == 0){
+            }
+            else {
+                var resultwindow = this.rect($(window).width()-75,$(window).height()-75,70,70,20).attr({fill: "rgba(0,0,0,0.3)", "stroke-opacity":0});
+                var resultwindowtext = this.text($(window).width()-40,$(window).height()-40,text).attr({font: "18px Menlo, Helvetica, Arial", fill:"white",cursor:"default"});
+                if (results-matches<0){
+                    resultwindowtext.attr({fill:"red"});
+                }
+                matches = results;
+                resultwindow.toFront();
+                resultwindowtext.toFront();
+                resultwindow.animate({"fill-opacity":0},800);
+                resultwindowtext.animate({"fill": "rgb(230, 245, 230)", "fill-opacity":0},800, function () {resultwindow.remove(); resultwindowtext.remove();});
+            }
+        }
 
         Raphael.fn.connection = function (obj1, obj2, line, bg) {
             if (obj1.line && obj1.from && obj1.to) {
@@ -650,7 +653,8 @@ CONNECTIONS & TEAM DRAGGING
                 obj1 = line.from;
                 obj2 = line.to;
             }
-            var bb1 = obj1.getBBox(),
+            if (obj1 != null && obj2 != null){
+            try {var bb1 = obj1.getBBox(),
                 bb2 = obj2.getBBox(),
                 p = [{x: bb1.x + bb1.width / 2, y: bb1.y - 1},
                 {x: bb1.x + bb1.width / 2, y: bb1.y + bb1.height + 1},
@@ -660,8 +664,12 @@ CONNECTIONS & TEAM DRAGGING
                 {x: bb2.x + bb2.width / 2, y: bb2.y + bb2.height + 1},
                 {x: bb2.x - 1, y: bb2.y + bb2.height / 2},
                 {x: bb2.x + bb2.width + 1, y: bb2.y + bb2.height / 2}],
-                d = {}, dis = [];
-            for (var i = 0; i < 4; i++) {
+                d = {}, dis = [];}
+            catch (e){
+                if (e==TypeError){}
+            }
+            }
+            try {for (var i = 0; i < 4; i++) {
                 for (var j = 4; j < 8; j++) {
                     var dx = Math.abs(p[i].x - p[j].x),
                         dy = Math.abs(p[i].y - p[j].y);
@@ -671,12 +679,14 @@ CONNECTIONS & TEAM DRAGGING
                     }
                 }
             }
-            if (dis.length == 0) {
+            } catch (e){if (e==TypeError){}}
+            try {if (dis != null && dis.length == 0) {
                 var res = [0, 4];
             } else {
                 res = d[Math.min.apply(Math, dis)];
             }
-            var x1 = p[res[0]].x,
+            } catch (e) { if (e == TypeError){}}
+            try { var x1 = p[res[0]].x,
                 y1 = p[res[0]].y,
                 x4 = p[res[1]].x,
                 y4 = p[res[1]].y;
@@ -687,6 +697,7 @@ CONNECTIONS & TEAM DRAGGING
                 x3 = [0, 0, 0, 0, x4, x4, x4 - dx, x4 + dx][res[1]].toFixed(3),
                 y3 = [0, 0, 0, 0, y1 + dy, y1 - dy, y4, y4][res[1]].toFixed(3);
             var path = ["M", x1.toFixed(3), y1.toFixed(3), "C", x2, y2, x3, y3, x4.toFixed(3), y4.toFixed(3)].join(",");
+            } catch (e) { if (e == TypeError){}}
             if (line && line.line) {
                 line.bg && line.bg.attr({path: path});
                 line.line.attr({path: path});
@@ -699,14 +710,15 @@ CONNECTIONS & TEAM DRAGGING
                     to: obj2
                 };
             }
+        
         };
 
 
-        /*
-
-        VANILLA DRAGGING
-
-        */
+/*
+-----------------------------------------------------------------------------------------------
+                                "VANILLA" TAG DRAGGING (NO RESTRICTIONS)
+-----------------------------------------------------------------------------------------------
+*/
 
             function dragStart () {
                 this.ox = this.attr("x");
@@ -758,11 +770,11 @@ CONNECTIONS & TEAM DRAGGING
 
 
 
-        /*
-
-        SLIDER DRAGGING
-
-        */
+/*
+-----------------------------------------------------------------------------------------------
+                            SLIDER "BRACKET" MOTIONS & RESTRICTIONS (RESTRICTED "X" TRAVEL)
+-----------------------------------------------------------------------------------------------
+*/
 
             function sliderdragStart  (x,y) {
                 this.mousex    = x;   
@@ -822,23 +834,26 @@ CONNECTIONS & TEAM DRAGGING
                     }
                     else{}
                 }
-                else if (this.attr("x")<context%40){ 
+                else if (this.attr("x")-20<context%40){ 
                     // SPILLING LEFT
                     var extra = this.offset-40+context;
                     this.offset = 40-context;
-                    this.attr({x: context%40, width: Math.max(this.attr("width")+extra,20), fill: "white"});
+                    this.attr({x: 20+context%40, width: Math.max(this.attr("width")+extra,20), fill: "white"});
                     this.animate(bracketattr, 200);
                 }
                 else {}
 
-                if ((this.attr("width")+100)>context){
+                if ((this.attr("width")+80)>context){
                     // TOO BIG
                     var remainder = context%40;
+                    if (remainder < 20){
+                        remainder += 20;
+                    }
                     this.attr({x: remainder, width: context-40-remainder, fill: "white" });
                     this.animate(bracketattr, 200);
                 }
                 delete(this.ox);
                 delete(this.ow);
                 delete(this.oy);
-                R.drawtags(tags);
+                R.ShowDelta(R.drawtags(tags));
             }
