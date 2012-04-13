@@ -1,5 +1,7 @@
 /*
 ┌───────────────────────────────────────────────────────────┐
+│                 VERSION WITHOUT TIMEBAR                   │
+├───────────────────────────────────────────────────────────┤
 │         SAMPLE DATABASE, SETTINGS, & CONSTRUCTORS         │
 └───────────────────────────────────────────────────────────┘ 
 */
@@ -225,7 +227,7 @@ window.onload = function () {
     R      = Raphael("canvas");
     T      = Raphael("canvas");
     topbar = R.rect(0, 0,"100%",55,0).attr({fill:bckgrnd, stroke:"         none"});
-    R.timeline(tags);
+    // R.timeline(tags);
     R.backbutton(10,10,"back");
     R.setSize("100%","100%");
     T.setSize(100,55);
@@ -237,11 +239,11 @@ window.onload = function () {
     R.blockbutton(200,10, "Questions? Answers? Fixes? Bugs? Talk to");
     R.plusbutton(490,10, "Jonathan Raiman").attr({href:"mailto:jonathan.raiman@pomona.edu"});
     R.minusbutton(670,10, "");
-    matches = R.drawtags(tags);
+    matches = R.drawalltags(tags);
     web2o.MoveTo(250,200);
-    web2o.florify(tags);
+    // web2o.florify(tags);
     boss.MoveTo(800,600);
-    boss.florify(tags);
+    // boss.florify(tags);
 };
 
 Raphael.fn.timeline = function (array){
@@ -627,7 +629,7 @@ setInterval ( function () {
 
 tag.prototype.florify = function (group){
     R.drawtag(this);
-    var separation = 5;
+    var separation = 10;
     var pitch = 0;
     var xradius = 180;
     var yradius = 0.5*xradius;
@@ -784,6 +786,7 @@ Raphael.fn.connection = function (obj1, obj2, line, bg) {
         x3 = [0, 0, 0, 0, x4, x4, x4 - dx, x4 + dx][res[1]].toFixed(3),
         y3 = [0, 0, 0, 0, y1 + dy, y1 - dy, y4, y4][res[1]].toFixed(3);
     var path = ["M", x1.toFixed(3), y1.toFixed(3), "C", x2, y2, x3, y3, x4.toFixed(3), y4.toFixed(3)].join(",");
+    path.toBack();
     } catch (e) { if (e == TypeError){}}
     if (line && line.line) {
         line.bg && line.bg.attr({path: path});

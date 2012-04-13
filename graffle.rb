@@ -1,3 +1,4 @@
+require 'rubygems'
 require 'json'
 require 'sinatra'
 require 'hashie/mash'
@@ -16,4 +17,8 @@ end
 
 get '/astro' do
   erb :astro
+end
+
+get '/all' do
+  erb :time_all
 end
