@@ -262,6 +262,13 @@ window.onload = function () {
     boss.florify(tags);
 };
 
+$("#nameform").live('submit', function (){
+    localStorage.firstname = $("#firstnameval").val();
+    localStorage.lastname = $("#lastnameval").val();
+    $.fancybox.close();
+});
+
+
 Raphael.fn.timeline = function (array){
     var text ="";
     for (var i=0;i<array.length;i++){
