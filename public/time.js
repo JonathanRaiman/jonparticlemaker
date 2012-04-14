@@ -221,7 +221,25 @@ $("document").ready( function () {
     console.log("solved");
 });
 window.onload = function () {
-
+    if(typeof(Storage)!=="undefined")
+        {
+        $.fancybox({
+                'overlayShow'   : true,
+                'transitionIn'  : 'elastic',
+                'transitionOut' : 'elastic',
+                'overlayColor'  : '#000',
+                'overlayOpacity': 0.3,
+                'href'          : '#namebox'
+            });
+        $("#firstnameval").attr("placeholder",localStorage.firstname || "Firstname,");
+        $("#lastnameval").attr("placeholder",localStorage.lastname || "lastname...");
+        $("#userid").text(localStorage.firstname || "visitor");
+        $("#firstnameval").focus();
+        }
+    else
+        {
+        console.log("no local storage :(");
+        }
     R      = Raphael("canvas");
     T      = Raphael("canvas");
     topbar = R.rect(0, 0,"100%",55,0).attr({fill:bckgrnd, stroke:"         none"});

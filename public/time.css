@@ -1,3 +1,7 @@
+            * {
+                font-family: "Lucida Grande", Lucida, Verdana, sans-serif;
+            }
+
             body, html {
                 background: rgb(30,31,30);
                 height: 100%;
@@ -33,15 +37,35 @@
                 color: white;
             }
 
-            input[type="text"] {
-                display: block;
-                margin-left:auto;
-                margin-right:auto;
-                width: 640px;
-            }
-
             #topbar{
                 width: 30px !important;
                 position: absolute;
                 left: 100px;
+            }
+
+            #namebox,  #fancybox-title-inside, #namebox input{
+            font-size: 14px;
+            color: #333;
+            }
+            #namebox input{
+                width: 100px;
+            }
+            #namebox{
+                text-align: center;
+                line-height: 300%;
+                width: 300px;
+            }
+            .usersignintitle{
+                font-size: 18px;
+                color: black;
+                font-weight: bold;
+            }
+
+            .userid{
+                color: black;
+                font-weight: bold;
+            }
+
+            .txtpurple{
+                color: rgb(171, 129, 255);
             }

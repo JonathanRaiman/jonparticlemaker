@@ -2,6 +2,12 @@
 ┌───────────────────────────────────────────────────────────┐
 │                 VERSION WITHOUT TIMEBAR                   │
 ├───────────────────────────────────────────────────────────┤
+│         LOCAL STORAGE EXAMPLES & TRIALS                   │
+└───────────────────────────────────────────────────────────┘ 
+
+
+/*
+┌───────────────────────────────────────────────────────────┐
 │         SAMPLE DATABASE, SETTINGS, & CONSTRUCTORS         │
 └───────────────────────────────────────────────────────────┘ 
 */
@@ -68,16 +74,18 @@ Raphael.fn.drawtag = function (sometag) {
         sometag.shadow = this.ellipse(text_info["x"]+text_info["width"]/2, text_info["y"]+text_info["height"]/2, 250, 200).attr({fill: "rhsb(0.7,0, 0)-hsb(0.172 , 1, .12)", stroke: "none", opacity: 0}).toBack();
         sometag.shadow.dad = sometag;
         sometag.textbubble.attr({font: "14px Helvetica, Arial", "font-weight": "bold"});
-        sometag.box.dblclick( function () {sometag.florify(tags);});
-        sometag.textbubble.dblclick( function () {sometag.florify(tags);});
+        sometag.box.dblclick( function (evt) {evt.preventDefault();sometag.florify(tags);});
+        sometag.textbubble.dblclick( function (evt) {evt.preventDefault();sometag.florify(tags);});
         sometag.box.node.oncontextmenu =function(){return false;}
         sometag.textbubble.node.oncontextmenu =function(){return false;}
         sometag.box.mousedown( function (evt) {
             if (evt.button == 2) {
+            evt.preventDefault();
             sometag.trunkify(tags);
             }});
         sometag.textbubble.mousedown( function (evt) {
             if (evt.button == 2) {
+            evt.preventDefault();
             sometag.trunkify(tags);
             }});
     }
@@ -223,7 +231,25 @@ $("document").ready( function () {
     console.log("solved");
 });
 window.onload = function () {
-
+    if(typeof(Storage)!=="undefined")
+        {
+        $.fancybox({
+                'overlayShow'   : true,
+                'transitionIn'  : 'elastic',
+                'transitionOut' : 'elastic',
+                'overlayColor'  : '#000',
+                'overlayOpacity': 0.3,
+                'href'          : '#namebox'
+            });
+        $("#firstnameval").attr("placeholder",localStorage.firstname || "Firstname,");
+        $("#lastnameval").attr("placeholder",localStorage.lastname || "lastname...");
+        $("#userid").text(localStorage.firstname || "visitor");
+        $("#firstnameval").focus();
+        }
+    else
+        {
+        console.log("no local storage :(");
+        }
     R      = Raphael("canvas");
     T      = Raphael("canvas");
     topbar = R.rect(0, 0,"100%",55,0).attr({fill:bckgrnd, stroke:"         none"});
@@ -233,8 +259,8 @@ window.onload = function () {
     T.setSize(100,55);
     R.canvas.setAttribute('id','leftbar');
     T.canvas.setAttribute('id','rightbar');
-    $("#leftbar").css({position:"fixed", top:0,"z-index": 100});
-    $("#rightbar").css({position: "fixed", top:0, right: 0, "z-index": 400});
+    $("#leftbar").css({position:"absolute", top:0,"z-index": 100});
+    $("#rightbar").css({position: "absolute", top:0, right: 0, "z-index": 400});
     T.forwardbutton(0,10, "next");
     R.blockbutton(200,10, "Questions? Answers? Fixes? Bugs? Talk to");
     R.plusbutton(490,10, "Jonathan Raiman").attr({href:"mailto:jonathan.raiman@pomona.edu"});
@@ -245,6 +271,11 @@ window.onload = function () {
     boss.MoveTo(800,600);
     // boss.florify(tags);
 };
+$("#nameform").live('submit', function (){
+    localStorage.firstname = $("#firstnameval").val();
+    localStorage.lastname = $("#lastnameval").val();
+    $.fancybox.close();
+});
 
 Raphael.fn.timeline = function (array){
     var text ="";
