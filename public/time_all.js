@@ -230,50 +230,71 @@ $("document").ready( function () {
 });
     console.log("solved");
 });
-window.onload = function () {
-    if(typeof(Storage)!=="undefined")
-        {
+
+signin = function () {
         $.fancybox({
                 'overlayShow'   : true,
                 'transitionIn'  : 'elastic',
                 'transitionOut' : 'elastic',
                 'overlayColor'  : '#000',
                 'overlayOpacity': 0.3,
-                'href'          : '#namebox'
-            });
+                'href'          : '#namebox',
+                'autoScale'     : true,
+                'scrolling'     : 'no'
+        });
         $("#firstnameval").attr("placeholder",localStorage.firstname || "Firstname,");
         $("#lastnameval").attr("placeholder",localStorage.lastname || "lastname...");
         $("#userid").text(localStorage.firstname || "visitor");
         $("#firstnameval").focus();
         }
-    else
+
+window.onload = function () {
+    if(typeof(Storage)!=="undefined" && (localStorage.firstname == null || localStorage.firstname == ""))
         {
+        signin();
+        }
+    else if (typeof(Storage)!=="undefined")
+        {
+        }
+    else {
         console.log("no local storage :(");
         }
     R      = Raphael("canvas");
     T      = Raphael("canvas");
     topbar = R.rect(0, 0,"100%",55,0).attr({fill:bckgrnd, stroke:"         none"});
     // R.timeline(tags);
-    R.backbutton(10,10,"back");
+    // R.backbutton(10,10,"back");
     R.setSize("100%","100%");
-    T.setSize(100,55);
+    T.setSize(150,55);
     R.canvas.setAttribute('id','leftbar');
     T.canvas.setAttribute('id','rightbar');
     $("#leftbar").css({position:"absolute", top:0,"z-index": 100});
     $("#rightbar").css({position: "absolute", top:0, right: 0, "z-index": 400});
-    T.forwardbutton(0,10, "next");
-    R.blockbutton(200,10, "Questions? Answers? Fixes? Bugs? Talk to");
-    R.plusbutton(490,10, "Jonathan Raiman").attr({href:"mailto:jonathan.raiman@pomona.edu"});
-    R.minusbutton(670,10, "");
+    // T.forwardbutton(0,10, "next");
+    var signinbtn = R.blockbutton(10,10, (localStorage.firstname || "visitor")+" "+(localStorage.lastname || ""));
+    signinbtn[1].node.setAttribute('id','idtext');
+    signinbtn[0].node.setAttribute('id','idbox');
+    $("#idbox").live('click', function() {signin();});
+    $("#idtext").live('click', function() {signin();});
+    T.plusbutton(40,10, "Questions?").attr({href:"mailto:jonathan.raiman@pomona.edu"});
+    // R.minusbutton(670,10, "");
     matches = R.drawalltags(tags);
     web2o.MoveTo(250,200);
     // web2o.florify(tags);
     boss.MoveTo(800,600);
     // boss.florify(tags);
 };
+
 $("#nameform").live('submit', function (){
+    localStorage.removeItem("lastname");
+    localStorage.removeItem("firstname");
     localStorage.firstname = $("#firstnameval").val();
     localStorage.lastname = $("#lastnameval").val();
+    $("#idbox").remove();
+    $("#idtext").remove();
+    var signinbtn = R.blockbutton(10,10, (localStorage.firstname || "visitor")+" "+(localStorage.lastname || ""));
+    signinbtn[1].node.setAttribute('id','idtext');
+    signinbtn[0].node.setAttribute('id','idbox');
     $.fancybox.close();
 });
 
@@ -526,7 +547,6 @@ Raphael.fn.blockbutton = function (x,y, text, callback){
         set.mouseout(function () {button.unhovered();text.unhovered();});
         set.mousedown(function (e) {e.preventDefault(); button.pressed();text.pressed();});
         set.mouseup(function () {button.unpressed();text.unpressed();});
-        set.click(callback);
         text.toFront();
 
     return set;
