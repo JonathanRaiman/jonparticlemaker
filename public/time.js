@@ -615,6 +615,18 @@ function hasClass (el, enquiry){
         return false;
 }
 
+Array.prototype.shuffle = function() {
+    var len = this.length;
+    var i = len;
+     while (i--) {
+        var p = parseInt(Math.random()*len);
+        var t = this[i];
+    this[i] = this[p];
+    this[p] = t;
+    }
+    return this;
+}
+
 function addClass(el, addition){
         if (hasClass(el,addition)==false){
             el.setAttribute("class",el.getAttribute("class").split(/\W+/).join(" ")+" "+addition);
@@ -668,6 +680,7 @@ tag.prototype.florify = function (group){
         if (children.length>0){
             pitch = 2*Math.PI/children.length;
         }
+        children.shuffle();
         for (var j=0;j<children.length;j++){
             children[j].MoveTo(box["x"]+xradius*Math.cos(currentpitch)-box["width"]/2,box["y"]+yradius*Math.sin(currentpitch)-box["height"]/2);
             currentpitch += pitch;
@@ -699,6 +712,7 @@ tag.prototype.trunkify = function (group){
         var starposition = box["x"]+box["width"]/2-elperfloor*0.5*(maxelwidth+2*separation);
         var currentfloor = 1;
         var onthisfloor = 0;
+        children.shuffle();
         for (var h=0;h<children.length;h++){
                 onthisfloor++;
                 starposition -= children[h].box.getBBox(false)["width"]/2;
