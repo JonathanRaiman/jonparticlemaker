@@ -2,6 +2,7 @@ require 'rubygems'
 require 'json'
 require 'sinatra'
 require 'hashie/mash'
+
 # require 'sinatra/activerecord'
 
 # db = URI.parse(ENV['DATABASE_URL'] || 'postgres://localhost/mydb')
@@ -16,6 +17,10 @@ require 'hashie/mash'
 # )
 
 get '/' do
+  erb :selector
+end
+
+get '/time' do
   erb :time
 end
 
@@ -33,4 +38,8 @@ end
 
 get '/all' do
   erb :time_all
+end
+
+get '/archimedes' do
+    erb :archimedes
 end

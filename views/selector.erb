@@ -1,0 +1,48 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<!-- 
+┌───────────────────────────────────────────────────────────┐
+│                 TAG-CLOUDS WITH TIMEBAR                   │
+└───────────────────────────────────────────────────────────┘
+-->
+<html lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+        <title>Some Selection Animations</title>
+
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+        
+        <script src="raphael.js" type="text/javascript" charset="utf-8"></script>
+
+        <script src="selector.js" type="text/javascript" charset="utf-8"></script>
+
+        <link rel="stylesheet" type="text/css" href="/normal.css" media="screen">
+
+    </head>
+    <body>
+        <div>
+            <table>
+                <tr>
+                    <td>
+                        <span class="grey_button salt" onclick="get_memo_rules({'el':$(this)})">Edit Rules</span>
+                    </td>
+                    <td>
+                        <span class="grey_button salt" onclick="memo_attachment_mode({'el':$(this)})">Create Link</span>
+                    </td>
+                </tr>
+            </table>
+            <div class="memo_rules">
+            </div>
+        </div>
+        <div>
+            <table>
+                <tr>
+                    <td><span class="grey_button salt" onclick="get_memo_rules({'el':$(this)})">Edit Rules</span></td><td><span class="grey_button salt" onclick="memo_attachment_mode({'el':$(this)})">Create Link</span></td>
+                </tr>
+            </table>
+            <div class="memo_rules">
+            </div>
+        </div>
+    </body>
+      
+</html>

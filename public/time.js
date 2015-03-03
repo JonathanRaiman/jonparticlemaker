@@ -313,14 +313,15 @@ Raphael.fn.timeline = function (array){
 
 
 Raphael.fn.drawtags = function (words){
-    var acceptable = [];
-    var text;
+    var acceptable = [],
+        text = null,
+        xsize = $(window).width(),
+        ysize = $(window).height();
     try {var from = dots[Math.min((-bracket.offset-40)/20, dots.length-1)].dotdate;}
     catch (e) {if(e == TypeError){}}
     try{ var to =dots[Math.max(((-bracket.offset-40)/20-bracket.attr("width")/20),0)].dotdate;
     } catch (e) {if (e == TypeError){}}
-    var xsize = $(window).width();
-    var ysize = $(window).height();
+
     for (var i=0;i<words.length;i++){
         try{if (words[i].to >= from && words[i].to <= to){
             acceptable.push(words[i]);

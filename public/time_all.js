@@ -101,7 +101,6 @@ Raphael.fn.drawtag = function (sometag) {
     sometag.textbubble.drag(dragMove,dragStart,dragStop);
     sometag.textbubble.toFront();
     sometag.MoveTo(xsize/2+(Math.pow(Math.random(),3)-0.5)*xsize*0.9,(ysize+80)/2+(Math.pow(Math.random(),3)-0.5)*(ysize-80)*0.9, 500);
-    
 }
 
 }

@@ -1,2 +1,1 @@
-require 'graffle'
-require 'sinatra/activerecord/rake'
+Dir.glob('rakes/*.rake').each { |r| import r }
