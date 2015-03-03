@@ -39,7 +39,6 @@ function Rectangle (x, y, w, h) {
             return this;
         }
     };
-
 }
 
 Rectangle.prototype.intersection_volume = function (path) {
@@ -84,33 +83,33 @@ function draw_ocean() {
     return oc;
 }
 
-var canvas = document.getElementById('canvas'),
-    paper = new Raphael(canvas, 300, 300),
-    colour = '#bb9066',
-    mousedown = false,
-    width_slider = document.getElementsByClassName("width_slider")[0],
-    undo_btn = document.getElementsByClassName("undo-btn")[0],
-    redo_btn = document.getElementsByClassName("redo-btn")[0],
-    width = width_slider.value,
+var canvas        = document.getElementById('canvas'),
+    canvas_parent = canvas.parentNode,
+    paper         = new Raphael(canvas, 300, 300),
+    colour        = '#bb9066',
+    mousedown     = false,
+    width_slider  = document.getElementsByClassName("width_slider")[0],
+    undo_btn      = document.getElementsByClassName("undo-btn")[0],
+    redo_btn      = document.getElementsByClassName("redo-btn")[0],
+    width         = width_slider.value,
     volume_estimator = document.getElementsByClassName("volume_estimate")[0],
     lastX, lastY, path = null, pathString, paths = [], redo_list = [],
     pixels_per_cm = window.devicePixelRatio ? 50 * window.devicePixelRatio : 50,
-    ocean = draw_ocean(),
+    ocean         = draw_ocean(),
     intersections = [];
 
 function resize_drawing_board () {
     paper.setSize(
         Math.min(1000,
-            $(window).width() * (11.0/12.0)
+            $(canvas_parent).width()
         ),
         Math.min(
             1000,
             $(window).height() * 0.9
         )
     );
-    console.log(ocean);
     ocean.width(Math.min(1000,
-            $(window).width() * (11.0/12.0)
+        $(canvas_parent).width()
     ));
     ocean.y(Math.min(
             1000,
@@ -153,10 +152,103 @@ Path.prototype.add_to_paper = function () {
     });
 };
 
-Path.prototype._extend = function (x, y) {
-    this.pathString += 'l' + (x - this.lastX) + ' ' + (y - this.lastY);
-    this.path.attr('path', this.pathString);
+function draw_intersect(points) {
+    var lastX = points[0].x,
+        lastY = points[1].y;
+    var pathString = 'M' + lastX + ' ' + lastY + 'l0 0';
+    for (var i = 1; i < points.length;i++) {
+        pathString += 'l' + (points[i].x - lastX)  + ' ' + (points[i].y - lastY) + '';
+        lastX = points[i].x;
+        lastY = points[i].y;
+    }
+    pathString += "z";
+    var pp = paper.path(pathString).attr(
+        {
+            fill: "white",
+            stroke: "black",
+            "stroke-width": 1
+        }
+    );
+    points.forEach( function (po) {
+        paper.circle(po.x, po.y, 3).attr({fill:"red", "stroke": "black"});
+    });
+    return pp;
+}
+
+function get_intersection_point (p1, p2, y) {
+    if (p2.y < y && p1.y < y) {
+        return null;
+    } else {
+        var slope = (p2.y - p1.y) / (p2.x - p1.x);
+        var offset = p2.y - (p2.x * slope);
+        var desired_x = Math.abs(slope) > 1e-3 ? ((y - offset) / slope) : ((p1.x + p2.x) / 2);
+        if (desired_x !== desired_x)
+            desired_x = p1.x;
+        return new Vector(desired_x, y);
+    }
+}
+
+Path.prototype.intersections = function (el) {
+    var intersects = [];
+    var sealevel = el.y();
+
+    var inside = false;
+
+    var points = this.points;
+    var active_set = null,
+        inter_point;
+
+    for (var i = 0; i < points.length-1; i++) {
+        if (points[i].y >= sealevel) {
+            if (active_set !== null) {
+                active_set.push(points[i]);
+            } else {
+                inter_point = get_intersection_point(
+                    points[((i-1) + points.length) % points.length],
+                    points[i],
+                    sealevel
+                );
+                if (inter_point !== null) {
+                    active_set = [inter_point, points[i]];
+                } else {
+                    active_set = [points[i]];
+                }
+            }
+        } else {
+            if (active_set !== null) {
+                inter_point = get_intersection_point(
+                    points[((i-1) + points.length) % points.length],
+                    points[i],
+                    sealevel
+                );
+                if (inter_point !== null)
+                    active_set.push(inter_point);
+                intersects.push(active_set);
+                active_set = null;
+            }
+        }
+    }
+    if (inside) {
+        inter_point = get_intersection_point(
+            points[points.length-1],
+            points[0],
+            sealevel
+        );
+        if (active_set !== null) {
+            active_set.push(inter_point);
+            intersects.push(active_set);
+        } else {
+            intersects[intersects.length - 1].push(inter_point);
+        }
+    } else {
+        if (active_set !== null) {
+            intersects.push(active_set);
+        }
+    }
+    return intersects;
 };
+
+
 Path.prototype.remove = function () {
     this.path.remove();
 };
@@ -165,7 +257,8 @@ Path.prototype.extend = function (x, y) {
         clearTimeout(this.update_data_timeout);
     }
     this.points.push(new Vector(x,y));
-    this._extend(x, y);
+    this.pathString += 'l' + (x - this.lastX) + ' ' + (y - this.lastY);
+    this.path.attr('path', this.pathString);
     this.lastX = x;
     this.lastY = y;
     this.update_data_timeout = setTimeout(this.update_data.bind(this), 1);
@@ -186,8 +279,7 @@ Vector.triangle_size = function (A, B) {
     return B.x * A.y - A.x * B.y;
 };
 
-Path.prototype.update_data = function () {
-    var points = this.points;
+Path.get_path_volume = function (points) {
     var first_point = points[0];
     var volume = 0.0;
     for (var i = 2; i < points.length;i++) {
@@ -195,18 +287,23 @@ Path.prototype.update_data = function () {
         var B = points[i].minus(first_point);
         volume += Vector.triangle_size(A, B);
     }
-    update_volume(Math.abs(volume) / (pixels_per_cm * pixels_per_cm));
+    return Math.abs(volume) / (pixels_per_cm * pixels_per_cm);
+};
+
+Path.prototype.update_data = function () {
+    update_volume(
+        Path.get_path_volume(this.points)
+    );
 
     var inters = ocean.intersection_volume(this);
 
-
-
-    inters.forEach(function(co) {
-      intersections.push(paper.circle(co.x, co.y, 3).attr({stroke: 'black', fill: 'yellow'}));
-    });
+    // inters.forEach(function(co) {
+    //   intersections.push(paper.circle(co.x, co.y, 3).attr({stroke: 'black', fill: 'yellow'}));
+    // });
 };
+
 Path.prototype.close_path = function () {
-    this._extend(this.start_x, this.start_y);
+    this.extend(this.start_x, this.start_y);
 };
 
 $(canvas).mousedown(function (e) {
@@ -220,6 +317,13 @@ $(canvas).mousedown(function (e) {
 $(document).mouseup(function () {
     if (path !== null) {
         path.close_path();
+        path.update_data();
+        var ocean_intersects = path.intersections(ocean);
+        if (ocean_intersects !== null) {
+            ocean_intersects.forEach(function (inter) {
+                draw_intersect(inter);
+            });
+        }
         paths.push(path);
         path = null;
         redo_list.length = 0;
@@ -250,11 +354,9 @@ function redo_last_path () {
         if (redo_list.length === 0) {
             redo_btn.disabled = true;
         }
-
         last_path.add_to_paper();
         paths.push(last_path);
         undo_btn.disabled = false;
-
     }
 }
 

@@ -4,7 +4,6 @@
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
         <title>Some Timeline Animations</title>
-
         <link rel="stylesheet" href="css/style.css" type="text/css" media="screen">
         <style>
         #canvascolours > span {
@@ -26,12 +25,11 @@
             -ms-transform:rotate(90deg);
             transform:rotate(90deg);
         }
-        .volume_estimate {
+        .volume_estimate, .volume_submerged {
             color: #00a8e2;
             font-weight: bold;
         }
         </style>
-
     </head>
     <body>
         <div class="container">
@@ -40,24 +38,28 @@
             </div>
             <div class="row" id="canvaswrapper">
                 <div class="col-xs-1" id="canvascolours">
-                    <span class="color-btn" data-colour="black" style="background-color: black;"></span>
-                    <span class="color-btn" data-colour="red" style="background-color: red;"></span>
-                    <span class="color-btn" data-colour="orange" style="background-color: orange;"></span>
-                    <span class="color-btn" data-colour="brown" style="background-color:#bb9066;"></span>
-                    <span class="color-btn" data-colour="grey" style="background-color:#bcc2d1;"></span>
-                    <span class="color-btn" data-colour="yellow" style="background-color: yellow;"></span>
-                    <span class="color-btn" data-colour="green" style="background-color: green;"></span>
-                    <span class="color-btn" data-colour="blue" style="background-color: blue;"></span>
-                    <span class="color-btn" data-colour="indigo" style="background-color: rgb(75, 0, 130);"></span>
-                    <span class="color-btn" data-colour="violet" style="background-color: rgb(238, 130, 238);"></span>
-                    <span class="color-btn" data-colour="white" style="background-color: white;"></span>
-                    <button class="btn btn-default undo-btn" disabled>Undo</button>
-                    <button class="btn btn-default redo-btn" disabled>Redo</button>
+                    <span class="color-btn" style="background-color: black;"></span>
+                    <span class="color-btn" style="background-color: red;"></span>
+                    <span class="color-btn" style="background-color: orange;"></span>
+                    <span class="color-btn" style="background-color:#bb9066;"></span>
+                    <span class="color-btn" style="background-color:#bcc2d1;"></span>
+                    <span class="color-btn" style="background-color: yellow;"></span>
+                    <span class="color-btn" style="background-color: green;"></span>
+                    <span class="color-btn" style="background-color: blue;"></span>
+                    <span class="color-btn" style="background-color: rgb(75, 0, 130);"></span>
+                    <span class="color-btn" style="background-color: rgb(238, 130, 238);"></span>
+                    <span class="color-btn" style="background-color: white;"></span>
+                    <button class="btn btn-default undo-btn" disabled>
+                        Undo
+                    </button>
+                    <button class="btn btn-default redo-btn" disabled>
+                        Redo
+                    </button>
                     <input type='range'
-                               min="0.01"
-                               max="100.0"
-                               value="3.0"
-                               class="width_slider" />
+                           min="0.01"
+                           max="100.0"
+                           value="3.0"
+                           class="width_slider" />
                 </div>
                 <div class="col-xs-11" id="canvas"></div>
             </div>
