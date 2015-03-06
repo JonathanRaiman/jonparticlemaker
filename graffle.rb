@@ -1,5 +1,5 @@
 require 'rubygems'
-require 'json'
+#require 'json'
 require 'sinatra'
 require 'hashie/mash'
 
@@ -17,27 +17,27 @@ require 'hashie/mash'
 # )
 
 get '/' do
-  erb :selector
+    erb :selector
 end
 
 get '/time' do
-  erb :time
+    erb :time
 end
 
 get '/rain' do
-  erb :rain
+    erb :rain
 end
 
 get '/color' do
-  erb :index
+    erb :index
 end
 
 get '/astro' do
-  erb :astro
+    erb :astro
 end
 
 get '/all' do
-  erb :time_all
+    erb :time_all
 end
 
 get '/archimedes' do
