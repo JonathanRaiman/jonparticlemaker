@@ -14,6 +14,9 @@
             width: 20px;
             height: 20px;
         }
+        .color-btn.active {
+            border: 1px solid black;
+        }
         #canvascolours input[type='range'] {
             margin-top: 20px;
             width: 90%;
@@ -25,7 +28,7 @@
             -ms-transform:rotate(90deg);
             transform:rotate(90deg);
         }
-        .volume_estimate, .volume_submerged {
+        .estimate {
             color: #00a8e2;
             font-weight: bold;
         }
@@ -34,21 +37,22 @@
     <body>
         <div class="container">
             <div class="row">
-                <p>Volume estimate <span class="volume_estimate">0.0</span>. Volume submerged <span class="volume_submerged">0.0</span></p>
+                <p>Volume estimate <span class="estimate volume_estimate">0.0</span>. Volume submerged <span class="estimate volume_submerged">0.0</span>, Total Energy <span class="estimate total_energy">0.0</span>.</p>
             </div>
             <div class="row" id="canvaswrapper">
                 <div class="col-xs-1" id="canvascolours">
-                    <span class="color-btn" style="background-color: black;"></span>
-                    <span class="color-btn" style="background-color: red;"></span>
-                    <span class="color-btn" style="background-color: orange;"></span>
-                    <span class="color-btn" style="background-color:#bb9066;"></span>
-                    <span class="color-btn" style="background-color:#bcc2d1;"></span>
-                    <span class="color-btn" style="background-color: yellow;"></span>
-                    <span class="color-btn" style="background-color: green;"></span>
-                    <span class="color-btn" style="background-color: blue;"></span>
-                    <span class="color-btn" style="background-color: rgb(75, 0, 130);"></span>
-                    <span class="color-btn" style="background-color: rgb(238, 130, 238);"></span>
-                    <span class="color-btn" style="background-color: white;"></span>
+                    <!-- densities for wood: http://www.csudh.edu/oliver/chemdata/woods.htm -->
+                    <span class="color-btn" style="background-color: black;" data-density="0.454"></span>
+                    <span class="color-btn" style="background-color: red;" data-density="0.454"></span>
+                    <span class="color-btn" style="background-color: orange;" data-density="0.454"></span>
+                    <span class="color-btn" style="background-color:#bb9066;" data-density="0.454"></span>
+                    <span class="color-btn" style="background-color:#bcc2d1;" data-density="2.70"></span>
+                    <span class="color-btn" style="background-color: yellow;" data-density="0.454"></span>
+                    <span class="color-btn" style="background-color: green;" data-density="0.454"></span>
+                    <span class="color-btn" style="background-color: blue;" data-density="0.454"></span>
+                    <span class="color-btn" style="background-color: rgb(75, 0, 130);" data-density="0.454"></span>
+                    <span class="color-btn" style="background-color: rgb(238, 130, 238);" data-density="0.454"></span>
+                    <span class="color-btn" style="background-color: white;" data-density="0.454"></span>
                     <button class="btn btn-default undo-btn" disabled>
                         Undo
                     </button>
